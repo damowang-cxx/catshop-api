@@ -1,0 +1,11 @@
+import { InventoryAdjustmentDto } from './dto/inventory-adjustment.dto';
+import { InventoryService } from './inventory.service';
+export declare class InventoryController {
+    private readonly inventoryService;
+    constructor(inventoryService: InventoryService);
+    adjustInventory(payload: InventoryAdjustmentDto): {
+        productId: string;
+        inventory: number;
+        reason: string;
+    };
+}

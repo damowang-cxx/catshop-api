@@ -1,0 +1,26 @@
+type EnvRecord = Record<string, unknown>;
+export declare function validateEnv(config: EnvRecord): {
+    NODE_ENV: string;
+    PORT: number;
+    APP_URL: string;
+    API_PREFIX: string;
+    COOKIE_SECRET: string;
+    RATE_LIMIT_MAX: number;
+    JWT_SECRET: string;
+    JWT_REFRESH_SECRET: string;
+    DATABASE_URL: string;
+    REDIS_URL: string;
+    CLICKHOUSE_URL: string;
+    MEILISEARCH_URL: string;
+    S3_ENDPOINT: string;
+    S3_REGION: string;
+    S3_BUCKET: string;
+    S3_ACCESS_KEY_ID: string;
+    S3_SECRET_ACCESS_KEY: string;
+    UPLOAD_MAX_FILE_SIZE: number;
+    UPLOAD_ALLOWED_MIME_TYPES: string;
+    ADMIN_EMAIL: string;
+    ADMIN_PASSWORD: string;
+    ADMIN_DEMO_TOKEN: string;
+};
+export {};
