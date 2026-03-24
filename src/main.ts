@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+﻿import { join } from 'node:path';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -18,7 +18,7 @@ async function bootstrap() {
   );
 
   const configService = app.get(ConfigService);
-  const appUrl = configService.get<string>('app.url') ?? 'http://localhost:3001';
+  const appUrl = configService.get<string>('app.url') ?? 'http://127.0.0.1:3001';
   const port = configService.get<number>('app.port') ?? 3001;
   const apiPrefix = configService.get<string>('app.apiPrefix') ?? 'api';
   const uploadsRoot = join(process.cwd(), 'storage', 'uploads');
@@ -78,3 +78,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+

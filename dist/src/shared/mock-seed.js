@@ -1,8 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createMockSeed = createMockSeed;
+const password_util_1 = require("../modules/auth/password.util");
 function createMockSeed() {
     const now = new Date().toISOString();
+    const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@example.com';
+    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH ?? password_util_1.DEV_ADMIN_PASSWORD_HASH;
+    const customerEmail = process.env.CUSTOMER_EMAIL ?? 'alice@example.com';
+    const customerPasswordHash = process.env.CUSTOMER_PASSWORD_HASH ?? password_util_1.DEV_CUSTOMER_PASSWORD_HASH;
     const brands = [
         {
             id: 'brand_catroom',
@@ -237,8 +242,9 @@ function createMockSeed() {
     const customers = [
         {
             id: 'cus_alice',
-            email: 'alice@example.com',
-            password: 'password123',
+            email: customerEmail,
+            passwordHash: customerPasswordHash,
+            authProvider: 'local',
             firstName: 'Alice',
             lastName: 'Wang',
             phone: '+1 202-555-0123',
@@ -249,8 +255,8 @@ function createMockSeed() {
     const admins = [
         {
             id: 'admin_primary',
-            email: 'admin@example.com',
-            password: 'admin123',
+            email: adminEmail,
+            passwordHash: adminPasswordHash,
             name: 'Primary Admin',
             role: 'super_admin',
         },

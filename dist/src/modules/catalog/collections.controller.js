@@ -15,11 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CollectionsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const admin_auth_guard_1 = require("../../common/auth/admin-auth.guard");
-const bulk_action_request_dto_1 = require("../../common/dto/bulk-action-request.dto");
 const pagination_query_dto_1 = require("../../common/dto/pagination-query.dto");
 const catalog_service_1 = require("./catalog.service");
-const create_collection_dto_1 = require("./dto/create-collection.dto");
 const product_query_dto_1 = require("./dto/product-query.dto");
 let CollectionsController = class CollectionsController {
     catalogService;
@@ -27,26 +24,13 @@ let CollectionsController = class CollectionsController {
         this.catalogService = catalogService;
     }
     listCollections(query) {
-        const adminView = typeof query.page === 'number' || typeof query.pageSize === 'number';
-        return this.catalogService.listCollections(query, adminView);
-    }
-    createCollection(payload) {
-        return this.catalogService.createCollection(payload);
-    }
-    bulkCollections(payload) {
-        return this.catalogService.applyCollectionBulkAction(payload);
+        return this.catalogService.listPublicCollections(query);
     }
     getCollectionProducts(handle, query) {
         return this.catalogService.getCollectionProducts(handle, query);
     }
     getCollection(idOrHandle) {
-        return this.catalogService.getCollection(idOrHandle);
-    }
-    updateCollection(id, payload) {
-        return this.catalogService.updateCollection(id, payload);
-    }
-    deleteCollection(id) {
-        return this.catalogService.deleteCollection(id);
+        return this.catalogService.getPublicCollection(idOrHandle);
     }
 };
 exports.CollectionsController = CollectionsController;
@@ -57,24 +41,6 @@ __decorate([
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", void 0)
 ], CollectionsController.prototype, "listCollections", null);
-__decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(admin_auth_guard_1.AdminAuthGuard),
-    (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_collection_dto_1.CreateCollectionDto]),
-    __metadata("design:returntype", void 0)
-], CollectionsController.prototype, "createCollection", null);
-__decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(admin_auth_guard_1.AdminAuthGuard),
-    (0, common_1.Post)('bulk'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [bulk_action_request_dto_1.BulkActionRequestDto]),
-    __metadata("design:returntype", void 0)
-], CollectionsController.prototype, "bulkCollections", null);
 __decorate([
     (0, common_1.Get)(':handle/products'),
     __param(0, (0, common_1.Param)('handle')),
@@ -90,25 +56,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], CollectionsController.prototype, "getCollection", null);
-__decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(admin_auth_guard_1.AdminAuthGuard),
-    (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], CollectionsController.prototype, "updateCollection", null);
-__decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(admin_auth_guard_1.AdminAuthGuard),
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], CollectionsController.prototype, "deleteCollection", null);
 exports.CollectionsController = CollectionsController = __decorate([
     (0, swagger_1.ApiTags)('collections'),
     (0, common_1.Controller)('collections'),

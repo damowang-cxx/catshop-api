@@ -20,7 +20,13 @@ export declare function validateEnv(config: EnvRecord): {
     UPLOAD_MAX_FILE_SIZE: number;
     UPLOAD_ALLOWED_MIME_TYPES: string;
     ADMIN_EMAIL: string;
-    ADMIN_PASSWORD: string;
+    ADMIN_PASSWORD_HASH: string;
+    CUSTOMER_EMAIL: string;
+    CUSTOMER_PASSWORD_HASH: string;
     ADMIN_DEMO_TOKEN: string;
+    GOOGLE_AUTH_ENABLED: boolean;
+    GOOGLE_CLIENT_ID: string;
+    GOOGLE_CLIENT_SECRET: string;
+    GOOGLE_REDIRECT_URI: string;
 };
 export {};

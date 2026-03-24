@@ -1,9 +1,14 @@
-import { registerAs } from '@nestjs/config';
+﻿import { registerAs } from '@nestjs/config';
+
+import {
+  DEV_ADMIN_PASSWORD_HASH,
+  DEV_CUSTOMER_PASSWORD_HASH,
+} from '../modules/auth/password.util';
 
 export const appConfig = registerAs('app', () => ({
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number.parseInt(process.env.PORT ?? '3001', 10),
-  url: process.env.APP_URL ?? 'http://localhost:3001',
+  url: process.env.APP_URL ?? 'http://127.0.0.1:3001',
   apiPrefix: process.env.API_PREFIX ?? 'api',
   cookieSecret: process.env.COOKIE_SECRET ?? 'catshop-cookie-secret',
   rateLimitMax: Number.parseInt(process.env.RATE_LIMIT_MAX ?? '200', 10),
@@ -11,8 +16,18 @@ export const appConfig = registerAs('app', () => ({
   jwtRefreshSecret:
     process.env.JWT_REFRESH_SECRET ?? 'catshop-dev-refresh-secret',
   adminEmail: process.env.ADMIN_EMAIL ?? 'admin@example.com',
-  adminPassword: process.env.ADMIN_PASSWORD ?? 'admin123',
-  adminDemoToken: process.env.ADMIN_DEMO_TOKEN ?? 'test_admin_token',
+  adminPasswordHash: process.env.ADMIN_PASSWORD_HASH ?? DEV_ADMIN_PASSWORD_HASH,
+  customerEmail: process.env.CUSTOMER_EMAIL ?? 'alice@example.com',
+  customerPasswordHash:
+    process.env.CUSTOMER_PASSWORD_HASH ?? DEV_CUSTOMER_PASSWORD_HASH,
+  adminDemoToken:
+    process.env.NODE_ENV === 'development'
+      ? process.env.ADMIN_DEMO_TOKEN ?? 'test_admin_token'
+      : '',
+  googleAuthEnabled: process.env.GOOGLE_AUTH_ENABLED === 'true',
+  googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+  googleRedirectUri: process.env.GOOGLE_REDIRECT_URI ?? '',
 }));
 
 export const databaseConfig = registerAs('database', () => ({
@@ -35,3 +50,4 @@ export const uploadConfig = registerAs('upload', () => ({
   allowedMimeTypes: (process.env.UPLOAD_ALLOWED_MIME_TYPES ??
     'image/jpeg,image/png,image/webp,image/avif').split(','),
 }));
+

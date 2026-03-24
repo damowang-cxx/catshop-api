@@ -11,22 +11,57 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InventoryService = void 0;
 const common_1 = require("@nestjs/common");
-const mock_database_service_1 = require("../../shared/mock-database.service");
+const client_1 = require("@prisma/client");
+const prisma_service_1 = require("../../prisma/prisma.service");
 let InventoryService = class InventoryService {
-    mockDb;
-    constructor(mockDb) {
-        this.mockDb = mockDb;
+    prisma;
+    constructor(prisma) {
+        this.prisma = prisma;
     }
-    adjustInventory(payload) {
-        const product = this.mockDb.products.find((candidate) => candidate.id === payload.productId);
+    async adjustInventory(payload) {
+        const product = await this.prisma.product.findUnique({
+            where: { id: payload.productId },
+            include: {
+                variants: {
+                    include: {
+                        inventoryItem: true,
+                    },
+                    orderBy: {
+                        createdAt: 'asc',
+                    },
+                },
+            },
+        });
         if (!product) {
             throw new common_1.NotFoundException('Product not found.');
         }
-        product.inventory += payload.delta;
-        product.updatedAt = new Date().toISOString();
+        const variant = product.variants[0];
+        const inventoryItem = variant?.inventoryItem;
+        if (!variant || !inventoryItem) {
+            throw new common_1.NotFoundException('Inventory item not found.');
+        }
+        const nextQuantity = inventoryItem.quantityOnHand + payload.delta;
+        await this.prisma.$transaction([
+            this.prisma.inventoryItem.update({
+                where: { id: inventoryItem.id },
+                data: {
+                    quantityOnHand: nextQuantity,
+                },
+            }),
+            this.prisma.inventoryLedger.create({
+                data: {
+                    inventoryItemId: inventoryItem.id,
+                    changeType: client_1.InventoryChangeType.ADJUSTMENT,
+                    quantity: payload.delta,
+                    reason: payload.reason,
+                    referenceType: 'admin_adjustment',
+                    referenceId: payload.productId,
+                },
+            }),
+        ]);
         return {
             productId: product.id,
-            inventory: product.inventory,
+            inventory: nextQuantity,
             reason: payload.reason,
         };
     }
@@ -34,6 +69,6 @@ let InventoryService = class InventoryService {
 exports.InventoryService = InventoryService;
 exports.InventoryService = InventoryService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [mock_database_service_1.MockDatabaseService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], InventoryService);
 //# sourceMappingURL=inventory.service.js.map

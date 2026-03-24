@@ -13,6 +13,11 @@ enum UserStatus {
   DISABLED
 }
 
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
 enum AdminUserStatus {
   ACTIVE
   INVITED
@@ -101,6 +106,9 @@ model Customer {
   id           String                   @id @default(cuid())
   email        String                   @unique
   passwordHash String
+  authProvider AuthProvider             @default(LOCAL)
+  googleSub    String?                  @unique
+  avatarUrl    String?
   firstName    String?
   lastName     String?
   phone        String?

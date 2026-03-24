@@ -1,4 +1,4 @@
-# CatShop API
+﻿# CatShop API
 
 CatShop API is the independent backend for the CatShop storefront and admin panel.
 
@@ -25,7 +25,13 @@ CatShop API is the independent backend for the CatShop storefront and admin pane
   - `inventory`
   - `customer`
   - `search`
-- Frontend-compatible API placeholders and demo data
+- Prisma-backed persistence for:
+  - customer auth
+  - admin auth and roles
+  - products / collections / brands
+  - cart
+  - orders
+  - inventory reservations and commits
 - Fastify bootstrap with:
   - validation
   - Swagger
@@ -96,11 +102,13 @@ cp .env.example .env
 docker compose up -d postgres redis minio clickhouse meilisearch mailpit
 ```
 
-3. Install and generate Prisma client:
+3. Install dependencies, run migration, and seed:
 
 ```bash
 pnpm install
 pnpm prisma:generate
+pnpm prisma:migrate:dev --name init_persistence
+pnpm seed
 ```
 
 4. Run API:
@@ -111,19 +119,30 @@ pnpm dev
 
 5. Open Swagger:
 
-`http://localhost:3001/api/docs`
+`http://127.0.0.1:3001/api/docs`
 
-## Demo admin account
+## Google OAuth
 
-- email: `admin@example.com`
-- password: `admin123`
+To enable Google sign-in, set these variables in `.env`:
+
+- `GOOGLE_AUTH_ENABLED=true`
+- `GOOGLE_CLIENT_ID=...`
+- `GOOGLE_CLIENT_SECRET=...`
+- `GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback`
+
+## Development accounts
+
+- admin: `admin@example.com / admin123`
+- customer: `alice@example.com / password123`
+- the env file stores `ADMIN_PASSWORD_HASH` / `CUSTOMER_PASSWORD_HASH`, not plaintext passwords
 
 ## Local development notes
 
-- API base URL: `http://localhost:3001/api`
+- API base URL: `http://127.0.0.1:3001/api`
 - Uploaded files are stored under `storage/uploads`
-- Current service layer uses in-memory demo data for fast local integration
-- Prisma schema and seed are ready for the next step: replacing demo repositories with database repositories
+- Core commerce domains now use PostgreSQL through Prisma
+- `ADMIN_DEMO_TOKEN` is development-only and must not be set in production
+- `PRISMA_CONNECT_ON_BOOT=true` is the recommended default for real integration environments
 
 ## Project files
 
@@ -131,3 +150,4 @@ pnpm dev
 - roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Prisma schema: [prisma/schema.prisma](prisma/schema.prisma)
 - local infra: [docker-compose.yml](docker-compose.yml)
+

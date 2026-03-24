@@ -1,15 +1,20 @@
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import { MockDatabaseService } from '../../shared/mock-database.service';
+import { PrismaService } from '../../prisma/prisma.service';
 export declare class CustomerController {
-    private readonly mockDb;
-    constructor(mockDb: MockDatabaseService);
-    listCustomers(query: PaginationQueryDto): import("../../common/utils/pagination").PaginatedResponse<{
-        id: string;
-        email: string;
-        firstName: string | undefined;
-        lastName: string | undefined;
-        phone: string | undefined;
-        status: "active" | "locked";
-        lastLoginAt: string | undefined;
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    listCustomers(query: PaginationQueryDto): Promise<{
+        items: {
+            status: string;
+            lastLoginAt: string | undefined;
+            id: string;
+            email: string;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+        }[];
+        total: number;
+        page: number;
+        pageSize: number;
     }>;
 }

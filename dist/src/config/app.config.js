@@ -2,18 +2,27 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadConfig = exports.storageConfig = exports.databaseConfig = exports.appConfig = void 0;
 const config_1 = require("@nestjs/config");
+const password_util_1 = require("../modules/auth/password.util");
 exports.appConfig = (0, config_1.registerAs)('app', () => ({
     nodeEnv: process.env.NODE_ENV ?? 'development',
     port: Number.parseInt(process.env.PORT ?? '3001', 10),
-    url: process.env.APP_URL ?? 'http://localhost:3001',
+    url: process.env.APP_URL ?? 'http://127.0.0.1:3001',
     apiPrefix: process.env.API_PREFIX ?? 'api',
     cookieSecret: process.env.COOKIE_SECRET ?? 'catshop-cookie-secret',
     rateLimitMax: Number.parseInt(process.env.RATE_LIMIT_MAX ?? '200', 10),
     jwtSecret: process.env.JWT_SECRET ?? 'catshop-dev-jwt-secret',
     jwtRefreshSecret: process.env.JWT_REFRESH_SECRET ?? 'catshop-dev-refresh-secret',
     adminEmail: process.env.ADMIN_EMAIL ?? 'admin@example.com',
-    adminPassword: process.env.ADMIN_PASSWORD ?? 'admin123',
-    adminDemoToken: process.env.ADMIN_DEMO_TOKEN ?? 'test_admin_token',
+    adminPasswordHash: process.env.ADMIN_PASSWORD_HASH ?? password_util_1.DEV_ADMIN_PASSWORD_HASH,
+    customerEmail: process.env.CUSTOMER_EMAIL ?? 'alice@example.com',
+    customerPasswordHash: process.env.CUSTOMER_PASSWORD_HASH ?? password_util_1.DEV_CUSTOMER_PASSWORD_HASH,
+    adminDemoToken: process.env.NODE_ENV === 'development'
+        ? process.env.ADMIN_DEMO_TOKEN ?? 'test_admin_token'
+        : '',
+    googleAuthEnabled: process.env.GOOGLE_AUTH_ENABLED === 'true',
+    googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+    googleRedirectUri: process.env.GOOGLE_REDIRECT_URI ?? '',
 }));
 exports.databaseConfig = (0, config_1.registerAs)('database', () => ({
     url: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/catshop',

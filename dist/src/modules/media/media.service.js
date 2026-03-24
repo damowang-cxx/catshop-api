@@ -34,7 +34,7 @@ let MediaService = class MediaService {
         const buffer = await file.toBuffer();
         await (0, promises_1.mkdir)(uploadDirectory, { recursive: true });
         await (0, promises_1.writeFile)((0, node_path_1.join)(uploadDirectory, filename), buffer);
-        const appUrl = this.configService.get('app.url') ?? 'http://localhost:3001';
+        const appUrl = this.configService.get('app.url') ?? 'http://127.0.0.1:3001';
         return {
             url: `${appUrl}/uploads/${filename}`,
         };

@@ -3,70 +3,45 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AdminAuthGuard } from '../../common/auth/admin-auth.guard';
-import { BulkActionRequestDto } from '../../common/dto/bulk-action-request.dto';
+import { ApiTags } from '@nestjs/swagger';
+import type { FastifyRequest } from 'fastify';
+import { CustomerAuthGuard } from '../../common/auth/customer-auth.guard';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { CreateReturnDto } from './dto/create-return.dto';
-import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { OrderQueryDto } from './dto/order-query.dto';
-import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrderService } from './order.service';
 
 @ApiTags('orders')
+@UseGuards(CustomerAuthGuard)
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly orderService: OrderService) {}
 
   @Get()
-  listOrders(@Query() query: OrderQueryDto) {
-    const adminView = typeof query.page === 'number' || typeof query.pageSize === 'number';
-    return this.orderService.listOrders(query, adminView);
+  listOrders(
+    @Req() request: FastifyRequest & { customer: { id: string } },
+    @Query() query: OrderQueryDto,
+  ) {
+    return this.orderService.listCustomerOrders(request.customer.id, query);
   }
 
   @Post()
-  createOrder(@Body() payload: CreateOrderDto) {
-    return this.orderService.createOrder(payload);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(AdminAuthGuard)
-  @Post('bulk')
-  bulkUpdateOrders(@Body() payload: BulkActionRequestDto) {
-    return this.orderService.applyBulkAction(payload);
+  createOrder(
+    @Req() request: FastifyRequest & { customer: { id: string } },
+    @Body() payload: CreateOrderDto,
+  ) {
+    return this.orderService.createOrder(request.customer.id, payload);
   }
 
   @Get(':id')
-  getOrder(@Param('id') id: string) {
-    return this.orderService.getOrder(id);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(AdminAuthGuard)
-  @Patch(':id')
-  updateOrderStatus(
+  getOrder(
+    @Req() request: FastifyRequest & { customer: { id: string } },
     @Param('id') id: string,
-    @Body() payload: UpdateOrderStatusDto,
   ) {
-    return this.orderService.updateOrderStatus(id, payload);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(AdminAuthGuard)
-  @Post(':id/shipments')
-  createShipment(@Param('id') id: string, @Body() payload: CreateShipmentDto) {
-    return this.orderService.createShipment(id, payload);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(AdminAuthGuard)
-  @Post(':id/returns')
-  createReturn(@Param('id') id: string, @Body() payload: CreateReturnDto) {
-    return this.orderService.createReturn(id, payload);
+    return this.orderService.getOrder(id, request.customer.id);
   }
 }

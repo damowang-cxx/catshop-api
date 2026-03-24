@@ -18,7 +18,7 @@ const app_module_1 = require("./app.module");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, new platform_fastify_1.FastifyAdapter({ logger: true }));
     const configService = app.get(config_1.ConfigService);
-    const appUrl = configService.get('app.url') ?? 'http://localhost:3001';
+    const appUrl = configService.get('app.url') ?? 'http://127.0.0.1:3001';
     const port = configService.get('app.port') ?? 3001;
     const apiPrefix = configService.get('app.apiPrefix') ?? 'api';
     const uploadsRoot = (0, node_path_1.join)(process.cwd(), 'storage', 'uploads');

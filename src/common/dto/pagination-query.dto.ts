@@ -6,14 +6,14 @@ export class PaginationQueryDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  page?: number = 1;
+  page?: number;
 
   @ApiPropertyOptional({ default: 20 })
   @IsOptional()
   @IsInt()
   @Min(1)
   @Max(100)
-  pageSize?: number = 20;
+  pageSize?: number;
 
   @ApiPropertyOptional()
   @IsOptional()

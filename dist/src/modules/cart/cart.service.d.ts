@@ -1,10 +1,10 @@
-import { MockDatabaseService } from '../../shared/mock-database.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { AddCartLinesDto } from './dto/add-cart-lines.dto';
 import { RemoveCartLinesDto } from './dto/remove-cart-lines.dto';
 export declare class CartService {
-    private readonly mockDb;
-    constructor(mockDb: MockDatabaseService);
-    createCart(): {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    createCart(customerId?: string): Promise<{
         id: string;
         checkoutUrl: string;
         items: {
@@ -27,7 +27,12 @@ export declare class CartService {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -51,7 +56,12 @@ export declare class CartService {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -82,8 +92,8 @@ export declare class CartService {
             };
         };
         totalQuantity: number;
-    };
-    getCart(id: string): {
+    }>;
+    getCart(id: string, customerId?: string): Promise<{
         id: string;
         checkoutUrl: string;
         items: {
@@ -106,7 +116,12 @@ export declare class CartService {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -130,7 +145,12 @@ export declare class CartService {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -161,8 +181,8 @@ export declare class CartService {
             };
         };
         totalQuantity: number;
-    };
-    addLines(cartId: string, payload: AddCartLinesDto): {
+    }>;
+    addLines(cartId: string, payload: AddCartLinesDto, customerId?: string): Promise<{
         id: string;
         checkoutUrl: string;
         items: {
@@ -185,7 +205,12 @@ export declare class CartService {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -209,7 +234,12 @@ export declare class CartService {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -240,8 +270,8 @@ export declare class CartService {
             };
         };
         totalQuantity: number;
-    };
-    updateLines(cartId: string, payload: AddCartLinesDto): {
+    }>;
+    updateLines(cartId: string, payload: AddCartLinesDto, customerId?: string): Promise<{
         id: string;
         checkoutUrl: string;
         items: {
@@ -264,7 +294,12 @@ export declare class CartService {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -288,7 +323,12 @@ export declare class CartService {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -319,8 +359,8 @@ export declare class CartService {
             };
         };
         totalQuantity: number;
-    };
-    removeLines(cartId: string, payload: RemoveCartLinesDto): {
+    }>;
+    removeLines(cartId: string, payload: RemoveCartLinesDto, customerId?: string): Promise<{
         id: string;
         checkoutUrl: string;
         items: {
@@ -343,7 +383,12 @@ export declare class CartService {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -367,7 +412,12 @@ export declare class CartService {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -398,8 +448,9 @@ export declare class CartService {
             };
         };
         totalQuantity: number;
-    };
+    }>;
+    clearCart(cartId: string, customerId?: string): Promise<void>;
     private serializeCart;
     private findCart;
-    private findProductByMerchandise;
+    private findVariantByMerchandise;
 }

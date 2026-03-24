@@ -13,28 +13,58 @@ exports.AdminAuthGuard = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
+const prisma_service_1 = require("../../prisma/prisma.service");
 let AdminAuthGuard = class AdminAuthGuard {
     configService;
     jwtService;
-    constructor(configService, jwtService) {
+    prisma;
+    constructor(configService, jwtService, prisma) {
         this.configService = configService;
         this.jwtService = jwtService;
+        this.prisma = prisma;
     }
-    canActivate(context) {
+    async canActivate(context) {
         const request = context.switchToHttp().getRequest();
-        const cookies = request.cookies;
+        const token = this.extractToken(request);
+        if (!token) {
+            throw new common_1.UnauthorizedException('Admin token is required.');
+        }
+        const admin = await this.resolveAdminFromToken(token);
+        request.admin = admin;
+        return true;
+    }
+    extractToken(request) {
         const authHeader = request.headers.authorization;
         const bearerToken = authHeader?.startsWith('Bearer ')
             ? authHeader.slice(7)
             : undefined;
-        const cookieToken = cookies?.admin_token;
-        const token = bearerToken ?? cookieToken;
-        if (!token) {
-            throw new common_1.UnauthorizedException('Admin token is required.');
-        }
+        const cookieToken = request.cookies?.admin_token;
+        return bearerToken ?? cookieToken;
+    }
+    async resolveAdminFromToken(token) {
         const demoToken = this.configService.get('app.adminDemoToken');
-        if (token === demoToken || token.startsWith('test_admin_token_')) {
-            return true;
+        if (this.isDevelopment() &&
+            ((demoToken && token === demoToken) || token.startsWith('test_admin_token_'))) {
+            const demoAdmin = await this.prisma.adminUser.findFirst({
+                include: {
+                    role: {
+                        include: {
+                            permissions: {
+                                include: {
+                                    permission: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                orderBy: {
+                    createdAt: 'asc',
+                },
+            });
+            if (!demoAdmin) {
+                throw new common_1.UnauthorizedException('Admin not found.');
+            }
+            return this.serializeAdmin(demoAdmin);
         }
         try {
             const payload = this.jwtService.verify(token, {
@@ -43,17 +73,50 @@ let AdminAuthGuard = class AdminAuthGuard {
             if (payload.role !== 'admin') {
                 throw new common_1.UnauthorizedException('Admin role is required.');
             }
-            return true;
+            const admin = await this.prisma.adminUser.findUnique({
+                where: { id: payload.sub },
+                include: {
+                    role: {
+                        include: {
+                            permissions: {
+                                include: {
+                                    permission: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            if (!admin || admin.status === 'DISABLED') {
+                throw new common_1.UnauthorizedException('Admin account is unavailable.');
+            }
+            return this.serializeAdmin(admin);
         }
-        catch {
+        catch (error) {
+            if (error instanceof common_1.UnauthorizedException) {
+                throw error;
+            }
             throw new common_1.UnauthorizedException('Invalid admin token.');
         }
+    }
+    serializeAdmin(admin) {
+        return {
+            id: admin.id,
+            email: admin.email,
+            name: admin.name,
+            adminRole: admin.role.key,
+            permissions: admin.role.permissions.map(({ permission }) => permission.key),
+        };
+    }
+    isDevelopment() {
+        return this.configService.get('app.nodeEnv') === 'development';
     }
 };
 exports.AdminAuthGuard = AdminAuthGuard;
 exports.AdminAuthGuard = AdminAuthGuard = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        prisma_service_1.PrismaService])
 ], AdminAuthGuard);
 //# sourceMappingURL=admin-auth.guard.js.map

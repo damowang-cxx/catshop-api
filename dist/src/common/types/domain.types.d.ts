@@ -66,7 +66,10 @@ export interface ProductRecord {
 export interface CustomerRecord {
     id: string;
     email: string;
-    password: string;
+    passwordHash: string;
+    authProvider?: 'local' | 'google';
+    googleSub?: string;
+    avatarUrl?: string;
     firstName?: string;
     lastName?: string;
     phone?: string;
@@ -76,9 +79,10 @@ export interface CustomerRecord {
 export interface AdminRecord {
     id: string;
     email: string;
-    password: string;
+    passwordHash: string;
     name: string;
     role: string;
+    lastLoginAt?: string;
 }
 export interface AddressRecord {
     address1: string;

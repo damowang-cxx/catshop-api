@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateShipmentDto {
   @ApiProperty()
@@ -9,4 +9,9 @@ export class CreateShipmentDto {
   @ApiProperty()
   @IsString()
   trackingNumber!: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  trackingUrl?: string;
 }

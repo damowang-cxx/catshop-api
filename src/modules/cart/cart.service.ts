@@ -1,87 +1,190 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { MockDatabaseService } from '../../shared/mock-database.service';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { AddCartLinesDto } from './dto/add-cart-lines.dto';
 import { RemoveCartLinesDto } from './dto/remove-cart-lines.dto';
 
+const DEFAULT_CURRENCY = 'USD';
+
 @Injectable()
 export class CartService {
-  constructor(private readonly mockDb: MockDatabaseService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  createCart() {
-    const now = new Date().toISOString();
-    const cart = {
-      id: this.mockDb.createId('cart'),
-      currencyCode: 'USD',
-      items: [],
-      createdAt: now,
-      updatedAt: now,
-    };
+  async createCart(customerId?: string) {
+    const cart = await this.prisma.cart.create({
+      data: {
+        currency: DEFAULT_CURRENCY,
+        customerId: customerId ?? null,
+      },
+    });
 
-    this.mockDb.carts.push(cart);
-    return this.serializeCart(cart.id);
+    return this.serializeCart(cart.id, customerId);
   }
 
-  getCart(id: string) {
-    return this.serializeCart(id);
+  async getCart(id: string, customerId?: string) {
+    return this.serializeCart(id, customerId);
   }
 
-  addLines(cartId: string, payload: AddCartLinesDto) {
-    const cart = this.findCart(cartId);
+  async addLines(cartId: string, payload: AddCartLinesDto, customerId?: string) {
+    const cart = await this.findCart(cartId, customerId, true);
 
-    payload.lines.forEach((line) => {
-      const product = this.findProductByMerchandise(line.merchandiseId);
-      const existing = cart.items.find(
-        (item) => item.merchandiseId === line.merchandiseId,
-      );
+    for (const line of payload.lines) {
+      const variant = await this.findVariantByMerchandise(line.merchandiseId);
+      const existing = await this.prisma.cartItem.findFirst({
+        where: {
+          cartId: cart.id,
+          variantId: variant.id,
+        },
+      });
 
       if (existing) {
-        existing.quantity += line.quantity;
+        await this.prisma.cartItem.update({
+          where: { id: existing.id },
+          data: {
+            quantity: existing.quantity + line.quantity,
+          },
+        });
       } else {
-        cart.items.push({
-          id: this.mockDb.createId('line'),
-          merchandiseId: line.merchandiseId,
-          quantity: line.quantity,
-          productId: product.id,
+        await this.prisma.cartItem.create({
+          data: {
+            cartId: cart.id,
+            productId: variant.productId,
+            variantId: variant.id,
+            quantity: line.quantity,
+          },
         });
       }
+    }
+
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { updatedAt: new Date() },
     });
 
-    cart.updatedAt = new Date().toISOString();
-    return this.serializeCart(cartId);
+    return this.serializeCart(cart.id, customerId);
   }
 
-  updateLines(cartId: string, payload: AddCartLinesDto) {
-    const cart = this.findCart(cartId);
+  async updateLines(cartId: string, payload: AddCartLinesDto, customerId?: string) {
+    const cart = await this.findCart(cartId, customerId, true);
 
-    payload.lines.forEach((line) => {
-      const cartLine = cart.items.find((item) => item.id === line.id);
-      if (cartLine) {
-        const product = this.findProductByMerchandise(line.merchandiseId);
-        cartLine.merchandiseId = line.merchandiseId;
-        cartLine.productId = product.id;
-        cartLine.quantity = line.quantity;
+    for (const line of payload.lines) {
+      if (!line.id) {
+        continue;
       }
+
+      const existing = await this.prisma.cartItem.findFirst({
+        where: {
+          id: line.id,
+          cartId: cart.id,
+        },
+      });
+
+      if (!existing) {
+        continue;
+      }
+
+      const variant = await this.findVariantByMerchandise(line.merchandiseId);
+      await this.prisma.cartItem.update({
+        where: { id: existing.id },
+        data: {
+          variantId: variant.id,
+          productId: variant.productId,
+          quantity: line.quantity,
+        },
+      });
+    }
+
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { updatedAt: new Date() },
     });
 
-    cart.updatedAt = new Date().toISOString();
-    return this.serializeCart(cartId);
+    return this.serializeCart(cart.id, customerId);
   }
 
-  removeLines(cartId: string, payload: RemoveCartLinesDto) {
-    const cart = this.findCart(cartId);
-    cart.items = cart.items.filter((item) => !payload.lineIds.includes(item.id));
-    cart.updatedAt = new Date().toISOString();
-    return this.serializeCart(cartId);
+  async removeLines(
+    cartId: string,
+    payload: RemoveCartLinesDto,
+    customerId?: string,
+  ) {
+    const cart = await this.findCart(cartId, customerId, true);
+    await this.prisma.cartItem.deleteMany({
+      where: {
+        cartId: cart.id,
+        id: {
+          in: payload.lineIds,
+        },
+      },
+    });
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { updatedAt: new Date() },
+    });
+    return this.serializeCart(cart.id, customerId);
   }
 
-  private serializeCart(id: string) {
-    const cart = this.findCart(id);
-    const lines = cart.items.map((line) => {
-      const product = this.mockDb.products.find(
-        (candidate) => candidate.id === line.productId,
+  async clearCart(cartId: string, customerId?: string) {
+    const cart = await this.findCart(cartId, customerId, true);
+    await this.prisma.cartItem.deleteMany({
+      where: {
+        cartId: cart.id,
+      },
+    });
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { updatedAt: new Date() },
+    });
+  }
+
+  private async serializeCart(id: string, customerId?: string) {
+    const cart = await this.findCart(id, customerId, true);
+    const fullCart = await this.prisma.cart.findUnique({
+      where: { id: cart.id },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                images: {
+                  orderBy: { position: 'asc' },
+                },
+                translations: {
+                  where: {
+                    locale: 'zh',
+                  },
+                },
+              },
+            },
+            variant: {
+              include: {
+                prices: true,
+                optionValues: {
+                  include: {
+                    option: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!fullCart) {
+      throw new NotFoundException('Cart not found.');
+    }
+
+    const lines = fullCart.items.map((line) => {
+      const unitPrice = Number(
+        line.variant?.prices.find((price) => price.currency === DEFAULT_CURRENCY)
+          ?.amount ?? 0,
       );
-      const variant = product?.variants[0];
-      const unitPrice = product?.price ?? 0;
+      const translation = line.product?.translations[0];
+      const featuredImage = line.product?.images.find((image) => image.isPrimary) ??
+        line.product?.images[0];
 
       return {
         id: line.id,
@@ -89,19 +192,30 @@ export class CartService {
         cost: {
           totalAmount: {
             amount: (unitPrice * line.quantity).toFixed(2),
-            currencyCode: cart.currencyCode,
+            currencyCode: fullCart.currency,
           },
         },
         merchandise: {
-          id: line.merchandiseId,
-          title: variant?.title ?? 'Default',
-          selectedOptions: variant?.selectedOptions ?? [],
-          product: product
+          id: line.variantId ?? line.productId ?? '',
+          title: line.variant?.title ?? 'Default',
+          selectedOptions:
+            line.variant?.optionValues.map((optionValue) => ({
+              name: optionValue.option.name,
+              value: optionValue.value,
+            })) ?? [],
+          product: line.product
             ? {
-                id: product.id,
-                handle: product.handle,
-                title: product.title,
-                featuredImage: product.featuredImage ?? undefined,
+                id: line.product.id,
+                handle: line.product.handle,
+                title: translation?.title ?? line.product.handle,
+                featuredImage: featuredImage
+                  ? {
+                      url: featuredImage.url,
+                      altText: featuredImage.altText ?? '',
+                      width: 800,
+                      height: 800,
+                    }
+                  : null,
               }
             : undefined,
         },
@@ -114,60 +228,94 @@ export class CartService {
     );
 
     return {
-      id: cart.id,
+      id: fullCart.id,
       checkoutUrl: '/checkout',
       items: lines,
       lines,
       subtotal: {
         amount: subtotal.toFixed(2),
-        currencyCode: cart.currencyCode,
+        currencyCode: fullCart.currency,
       },
       total: {
         amount: subtotal.toFixed(2),
-        currencyCode: cart.currencyCode,
+        currencyCode: fullCart.currency,
       },
       tax: {
         amount: '0.00',
-        currencyCode: cart.currencyCode,
+        currencyCode: fullCart.currency,
       },
       cost: {
         subtotalAmount: {
           amount: subtotal.toFixed(2),
-          currencyCode: cart.currencyCode,
+          currencyCode: fullCart.currency,
         },
         totalAmount: {
           amount: subtotal.toFixed(2),
-          currencyCode: cart.currencyCode,
+          currencyCode: fullCart.currency,
         },
         totalTaxAmount: {
           amount: '0.00',
-          currencyCode: cart.currencyCode,
+          currencyCode: fullCart.currency,
         },
       },
-      totalQuantity: cart.items.reduce((sum, line) => sum + line.quantity, 0),
+      totalQuantity: lines.reduce((sum, line) => sum + line.quantity, 0),
     };
   }
 
-  private findCart(id: string) {
-    const cart = this.mockDb.carts.find((candidate) => candidate.id === id);
+  private async findCart(
+    id: string,
+    customerId?: string,
+    bindAnonymousCart = false,
+  ) {
+    const cart = await this.prisma.cart.findUnique({
+      where: { id },
+    });
     if (!cart) {
       throw new NotFoundException('Cart not found.');
+    }
+
+    if (cart.customerId && customerId && cart.customerId !== customerId) {
+      throw new ForbiddenException('Cart belongs to a different customer.');
+    }
+
+    if (!cart.customerId && customerId && bindAnonymousCart) {
+      return this.prisma.cart.update({
+        where: { id },
+        data: {
+          customerId,
+        },
+      });
     }
 
     return cart;
   }
 
-  private findProductByMerchandise(merchandiseId: string) {
-    const product =
-      this.mockDb.products.find((candidate) => candidate.id === merchandiseId) ??
-      this.mockDb.products.find((candidate) =>
-        candidate.variants.some((variant) => variant.id === merchandiseId),
-      );
+  private async findVariantByMerchandise(merchandiseId: string) {
+    const directVariant = await this.prisma.productVariant.findUnique({
+      where: { id: merchandiseId },
+      include: {
+        product: true,
+      },
+    });
+    if (directVariant) {
+      return directVariant;
+    }
 
-    if (!product) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: merchandiseId },
+      include: {
+        variants: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
+    });
+
+    if (!product || product.variants.length === 0) {
       throw new NotFoundException('Product not found.');
     }
 
-    return product;
+    return product.variants[0];
   }
 }

@@ -28,13 +28,26 @@ __decorate([
     __metadata("design:type", String)
 ], CheckoutItemDto.prototype, "quantity", void 0);
 class ShippingAddressDto {
+    firstName;
+    lastName;
     address1;
     address2;
     city;
     province;
     zip;
     country;
+    phone;
 }
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ShippingAddressDto.prototype, "firstName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ShippingAddressDto.prototype, "lastName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
@@ -66,6 +79,12 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ShippingAddressDto.prototype, "country", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ShippingAddressDto.prototype, "phone", void 0);
 class CreateOrderDto {
     cartId;
     items;

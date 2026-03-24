@@ -16,6 +16,7 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const auth_service_1 = require("./auth.service");
+const google_auth_dto_1 = require("./dto/google-auth.dto");
 const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
 let AuthController = class AuthController {
@@ -28,6 +29,12 @@ let AuthController = class AuthController {
     }
     register(payload) {
         return this.authService.register(payload);
+    }
+    googleUrl(query) {
+        return this.authService.getGoogleAuthorizationUrl(query);
+    }
+    googleCallback(payload) {
+        return this.authService.authenticateWithGoogle(payload);
     }
     logout() {
         return { success: true };
@@ -51,6 +58,20 @@ __decorate([
     __metadata("design:paramtypes", [register_dto_1.RegisterDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "register", null);
+__decorate([
+    (0, common_1.Get)('google/url'),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [google_auth_dto_1.GoogleAuthorizeQueryDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "googleUrl", null);
+__decorate([
+    (0, common_1.Post)('google/callback'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [google_auth_dto_1.GoogleCallbackDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "googleCallback", null);
 __decorate([
     (0, common_1.Post)('logout'),
     __metadata("design:type", Function),

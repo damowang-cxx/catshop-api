@@ -1,11 +1,11 @@
-import { MockDatabaseService } from '../../shared/mock-database.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { InventoryAdjustmentDto } from './dto/inventory-adjustment.dto';
 export declare class InventoryService {
-    private readonly mockDb;
-    constructor(mockDb: MockDatabaseService);
-    adjustInventory(payload: InventoryAdjustmentDto): {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    adjustInventory(payload: InventoryAdjustmentDto): Promise<{
         productId: string;
         inventory: number;
         reason: string;
-    };
+    }>;
 }

@@ -1,17 +1,63 @@
-import { BulkActionRequestDto } from '../../common/dto/bulk-action-request.dto';
 import { CatalogService } from './catalog.service';
-import { CreateProductDto } from './dto/create-product.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
 export declare class ProductsController {
     private readonly catalogService;
     constructor(catalogService: CatalogService);
-    listProducts(query: ProductQueryDto): import("../../common/types/domain.types").ProductRecord[] | import("../../common/utils/pagination").PaginatedResponse<import("../../common/types/domain.types").ProductRecord>;
-    createProduct(payload: CreateProductDto): import("../../common/types/domain.types").ProductRecord;
-    bulkProducts(payload: BulkActionRequestDto): {
-        updated: number;
-    };
-    getRecommendations(idOrHandle: string): import("../../common/types/domain.types").ProductRecord[];
-    getProduct(idOrHandle: string): import("../../common/types/domain.types").ProductRecord;
-    updateProduct(id: string, payload: Partial<CreateProductDto>): import("../../common/types/domain.types").ProductRecord;
-    deleteProduct(id: string): import("../../common/types/domain.types").ProductRecord;
+    listProducts(query: ProductQueryDto): Promise<any[] | import("../../common/utils/pagination").PaginatedResponse<any>>;
+    getRecommendations(idOrHandle: string): Promise<{
+        id: any;
+        handle: any;
+        availableForSale: any;
+        title: any;
+        description: any;
+        descriptionHtml: any;
+        options: any;
+        priceRange: {
+            minVariantPrice: {
+                amount: string;
+                currencyCode: string;
+            };
+            maxVariantPrice: {
+                amount: string;
+                currencyCode: string;
+            };
+        };
+        variants: any;
+        featuredImage: any;
+        images: any;
+        seo: {
+            title: any;
+            description: any;
+        };
+        tags: never[];
+        updatedAt: any;
+    }[]>;
+    getProduct(idOrHandle: string): Promise<{
+        id: any;
+        handle: any;
+        availableForSale: any;
+        title: any;
+        description: any;
+        descriptionHtml: any;
+        options: any;
+        priceRange: {
+            minVariantPrice: {
+                amount: string;
+                currencyCode: string;
+            };
+            maxVariantPrice: {
+                amount: string;
+                currencyCode: string;
+            };
+        };
+        variants: any;
+        featuredImage: any;
+        images: any;
+        seo: {
+            title: any;
+            description: any;
+        };
+        tags: never[];
+        updatedAt: any;
+    }>;
 }

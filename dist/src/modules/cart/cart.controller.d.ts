@@ -1,10 +1,14 @@
+import type { FastifyRequest } from 'fastify';
+import { AuthService } from '../auth/auth.service';
 import { CartService } from './cart.service';
 import { AddCartLinesDto } from './dto/add-cart-lines.dto';
 import { RemoveCartLinesDto } from './dto/remove-cart-lines.dto';
 export declare class CartController {
     private readonly cartService;
-    constructor(cartService: CartService);
-    getCart(id: string): {
+    private readonly authService;
+    constructor(cartService: CartService, authService: AuthService);
+    private resolveCustomerId;
+    getCart(id: string, request: FastifyRequest): Promise<{
         id: string;
         checkoutUrl: string;
         items: {
@@ -27,7 +31,12 @@ export declare class CartController {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -51,7 +60,12 @@ export declare class CartController {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -82,8 +96,8 @@ export declare class CartController {
             };
         };
         totalQuantity: number;
-    };
-    createCart(): {
+    }>;
+    createCart(request: FastifyRequest): Promise<{
         id: string;
         checkoutUrl: string;
         items: {
@@ -106,7 +120,12 @@ export declare class CartController {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -130,7 +149,12 @@ export declare class CartController {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -161,8 +185,8 @@ export declare class CartController {
             };
         };
         totalQuantity: number;
-    };
-    addCartItems(id: string, payload: AddCartLinesDto): {
+    }>;
+    addCartItems(id: string, payload: AddCartLinesDto, request: FastifyRequest): Promise<{
         id: string;
         checkoutUrl: string;
         items: {
@@ -185,7 +209,12 @@ export declare class CartController {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -209,7 +238,12 @@ export declare class CartController {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -240,8 +274,8 @@ export declare class CartController {
             };
         };
         totalQuantity: number;
-    };
-    updateCartItems(id: string, payload: AddCartLinesDto): {
+    }>;
+    updateCartItems(id: string, payload: AddCartLinesDto, request: FastifyRequest): Promise<{
         id: string;
         checkoutUrl: string;
         items: {
@@ -264,7 +298,12 @@ export declare class CartController {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -288,7 +327,12 @@ export declare class CartController {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -319,8 +363,8 @@ export declare class CartController {
             };
         };
         totalQuantity: number;
-    };
-    removeCartItems(id: string, payload: RemoveCartLinesDto): {
+    }>;
+    removeCartItems(id: string, payload: RemoveCartLinesDto, request: FastifyRequest): Promise<{
         id: string;
         checkoutUrl: string;
         items: {
@@ -343,7 +387,12 @@ export declare class CartController {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -367,7 +416,12 @@ export declare class CartController {
                     id: string;
                     handle: string;
                     title: string;
-                    featuredImage: import("../../common/types/domain.types").ImageRecord | undefined;
+                    featuredImage: {
+                        url: string;
+                        altText: string;
+                        width: number;
+                        height: number;
+                    } | null;
                 } | undefined;
             };
         }[];
@@ -398,5 +452,5 @@ export declare class CartController {
             };
         };
         totalQuantity: number;
-    };
+    }>;
 }

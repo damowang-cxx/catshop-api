@@ -20,6 +20,14 @@ class CheckoutItemDto {
 class ShippingAddressDto {
   @ApiProperty()
   @IsString()
+  firstName!: string;
+
+  @ApiProperty()
+  @IsString()
+  lastName!: string;
+
+  @ApiProperty()
+  @IsString()
   address1!: string;
 
   @ApiPropertyOptional()
@@ -42,6 +50,11 @@ class ShippingAddressDto {
   @ApiProperty()
   @IsString()
   country!: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  phone?: string;
 }
 
 export class CreateOrderDto {

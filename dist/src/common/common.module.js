@@ -10,15 +10,18 @@ exports.CommonModule = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const admin_auth_guard_1 = require("./auth/admin-auth.guard");
+const customer_auth_guard_1 = require("./auth/customer-auth.guard");
+const permissions_guard_1 = require("./auth/permissions.guard");
+const prisma_module_1 = require("../prisma/prisma.module");
 let CommonModule = class CommonModule {
 };
 exports.CommonModule = CommonModule;
 exports.CommonModule = CommonModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        imports: [jwt_1.JwtModule.register({})],
-        providers: [admin_auth_guard_1.AdminAuthGuard],
-        exports: [admin_auth_guard_1.AdminAuthGuard, jwt_1.JwtModule],
+        imports: [jwt_1.JwtModule.register({}), prisma_module_1.PrismaModule],
+        providers: [admin_auth_guard_1.AdminAuthGuard, customer_auth_guard_1.CustomerAuthGuard, permissions_guard_1.PermissionsGuard],
+        exports: [admin_auth_guard_1.AdminAuthGuard, customer_auth_guard_1.CustomerAuthGuard, permissions_guard_1.PermissionsGuard, jwt_1.JwtModule],
     })
 ], CommonModule);
 //# sourceMappingURL=common.module.js.map

@@ -8,8 +8,14 @@ export declare const appConfig: (() => {
     jwtSecret: string;
     jwtRefreshSecret: string;
     adminEmail: string;
-    adminPassword: string;
+    adminPasswordHash: string;
+    customerEmail: string;
+    customerPasswordHash: string;
     adminDemoToken: string;
+    googleAuthEnabled: boolean;
+    googleClientId: string;
+    googleClientSecret: string;
+    googleRedirectUri: string;
 }) & import("@nestjs/config").ConfigFactoryKeyHost<{
     nodeEnv: string;
     port: number;
@@ -20,8 +26,14 @@ export declare const appConfig: (() => {
     jwtSecret: string;
     jwtRefreshSecret: string;
     adminEmail: string;
-    adminPassword: string;
+    adminPasswordHash: string;
+    customerEmail: string;
+    customerPasswordHash: string;
     adminDemoToken: string;
+    googleAuthEnabled: boolean;
+    googleClientId: string;
+    googleClientSecret: string;
+    googleRedirectUri: string;
 }>;
 export declare const databaseConfig: (() => {
     url: string;

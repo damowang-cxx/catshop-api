@@ -1,5 +1,5 @@
 import { BulkActionRequestDto } from '../../common/dto/bulk-action-request.dto';
-import { MockDatabaseService } from '../../shared/mock-database.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CreateReturnDto } from './dto/create-return.dto';
@@ -7,295 +7,227 @@ import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { OrderQueryDto } from './dto/order-query.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 export declare class OrderService {
-    private readonly mockDb;
+    private readonly prisma;
     private readonly cartService;
-    constructor(mockDb: MockDatabaseService, cartService: CartService);
-    listOrders(query: OrderQueryDto, adminView?: boolean): {
-        totalPrice: {
-            amount: string;
-            currencyCode: string;
-        };
-        lineItems: {
-            id: string;
-            title: string;
-            quantity: number;
-            variant: {
-                id: string;
-                title: string;
-                price: {
-                    amount: string;
-                    currencyCode: string;
-                };
-            };
-            product: {
-                id: string;
-                handle: string;
-                title: string;
-                featuredImage: {
-                    url: string;
-                } | null;
-            };
-        }[];
-        id: string;
-        orderNumber: string;
-        customerId?: string;
-        customerName?: string;
-        customerEmail?: string;
-        customerPhone?: string;
+    constructor(prisma: PrismaService, cartService: CartService);
+    listCustomerOrders(customerId: string, query: OrderQueryDto): Promise<{
+        id: any;
+        orderNumber: any;
+        customerName: any;
+        customerEmail: any;
+        customerPhone: any;
+        shippingAddress: {
+            address1: any;
+            address2: any;
+            city: any;
+            province: any;
+            zip: any;
+            country: any;
+        } | undefined;
         subtotal: number;
         shipping: number;
         tax: number;
         total: number;
-        currencyCode: string;
-        status: import("../../common/types/domain.types").OrderStatus;
-        paymentStatus: "pending" | "paid" | "refunded";
-        shippingAddress?: import("../../common/types/domain.types").AddressRecord;
-        items: import("../../common/types/domain.types").OrderItemRecord[];
-        notes: string[];
-        logs: string[];
-        createdAt: string;
-        updatedAt: string;
-    }[] | import("../../common/utils/pagination").PaginatedResponse<{
+        status: string;
+        createdAt: any;
+        items: any;
         totalPrice: {
             amount: string;
-            currencyCode: string;
+            currencyCode: any;
         };
-        lineItems: {
-            id: string;
-            title: string;
-            quantity: number;
-            variant: {
-                id: string;
-                title: string;
-                price: {
-                    amount: string;
-                    currencyCode: string;
-                };
+        lineItems: any;
+    }[] | {
+        items: {
+            id: any;
+            orderNumber: any;
+            customerName: any;
+            customerEmail: any;
+            customerPhone: any;
+            shippingAddress: {
+                address1: any;
+                address2: any;
+                city: any;
+                province: any;
+                zip: any;
+                country: any;
+            } | undefined;
+            subtotal: number;
+            shipping: number;
+            tax: number;
+            total: number;
+            status: string;
+            createdAt: any;
+            items: any;
+            totalPrice: {
+                amount: string;
+                currencyCode: any;
             };
-            product: {
-                id: string;
-                handle: string;
-                title: string;
-                featuredImage: {
-                    url: string;
-                } | null;
-            };
+            lineItems: any;
         }[];
-        id: string;
-        orderNumber: string;
-        customerId?: string;
-        customerName?: string;
-        customerEmail?: string;
-        customerPhone?: string;
-        subtotal: number;
-        shipping: number;
-        tax: number;
         total: number;
-        currencyCode: string;
-        status: import("../../common/types/domain.types").OrderStatus;
-        paymentStatus: "pending" | "paid" | "refunded";
-        shippingAddress?: import("../../common/types/domain.types").AddressRecord;
-        items: import("../../common/types/domain.types").OrderItemRecord[];
-        notes: string[];
-        logs: string[];
-        createdAt: string;
-        updatedAt: string;
+        page: number;
+        pageSize: number;
     }>;
-    getOrder(id: string): {
-        totalPrice: {
-            amount: string;
-            currencyCode: string;
-        };
-        lineItems: {
-            id: string;
-            title: string;
-            quantity: number;
-            variant: {
-                id: string;
-                title: string;
-                price: {
-                    amount: string;
-                    currencyCode: string;
-                };
+    listAdminOrders(query: OrderQueryDto): Promise<{
+        items: {
+            id: any;
+            orderNumber: any;
+            customerName: any;
+            customerEmail: any;
+            customerPhone: any;
+            shippingAddress: {
+                address1: any;
+                address2: any;
+                city: any;
+                province: any;
+                zip: any;
+                country: any;
+            } | undefined;
+            subtotal: number;
+            shipping: number;
+            tax: number;
+            total: number;
+            status: string;
+            createdAt: any;
+            items: any;
+            totalPrice: {
+                amount: string;
+                currencyCode: any;
             };
-            product: {
-                id: string;
-                handle: string;
-                title: string;
-                featuredImage: {
-                    url: string;
-                } | null;
-            };
+            lineItems: any;
         }[];
-        id: string;
-        orderNumber: string;
-        customerId?: string;
-        customerName?: string;
-        customerEmail?: string;
-        customerPhone?: string;
+        total: number;
+        page: number;
+        pageSize: number;
+    }>;
+    getOrder(id: string, customerId?: string): Promise<{
+        id: any;
+        orderNumber: any;
+        customerName: any;
+        customerEmail: any;
+        customerPhone: any;
+        shippingAddress: {
+            address1: any;
+            address2: any;
+            city: any;
+            province: any;
+            zip: any;
+            country: any;
+        } | undefined;
         subtotal: number;
         shipping: number;
         tax: number;
         total: number;
-        currencyCode: string;
-        status: import("../../common/types/domain.types").OrderStatus;
-        paymentStatus: "pending" | "paid" | "refunded";
-        shippingAddress?: import("../../common/types/domain.types").AddressRecord;
-        items: import("../../common/types/domain.types").OrderItemRecord[];
-        notes: string[];
-        logs: string[];
-        createdAt: string;
-        updatedAt: string;
-    };
-    createOrder(payload: CreateOrderDto): {
+        status: string;
+        createdAt: any;
+        items: any;
         totalPrice: {
             amount: string;
-            currencyCode: string;
+            currencyCode: any;
         };
-        lineItems: {
-            id: string;
-            title: string;
-            quantity: number;
-            variant: {
-                id: string;
-                title: string;
-                price: {
-                    amount: string;
-                    currencyCode: string;
-                };
-            };
-            product: {
-                id: string;
-                handle: string;
-                title: string;
-                featuredImage: {
-                    url: string;
-                } | null;
-            };
-        }[];
-        id: string;
-        orderNumber: string;
-        customerId?: string;
-        customerName?: string;
-        customerEmail?: string;
-        customerPhone?: string;
+        lineItems: any;
+    }>;
+    createOrder(customerId: string, payload: CreateOrderDto): Promise<{
+        id: any;
+        orderNumber: any;
+        customerName: any;
+        customerEmail: any;
+        customerPhone: any;
+        shippingAddress: {
+            address1: any;
+            address2: any;
+            city: any;
+            province: any;
+            zip: any;
+            country: any;
+        } | undefined;
         subtotal: number;
         shipping: number;
         tax: number;
         total: number;
-        currencyCode: string;
-        status: import("../../common/types/domain.types").OrderStatus;
-        paymentStatus: "pending" | "paid" | "refunded";
-        shippingAddress?: import("../../common/types/domain.types").AddressRecord;
-        items: import("../../common/types/domain.types").OrderItemRecord[];
-        notes: string[];
-        logs: string[];
-        createdAt: string;
-        updatedAt: string;
-    };
-    updateOrderStatus(id: string, payload: UpdateOrderStatusDto): {
+        status: string;
+        createdAt: any;
+        items: any;
         totalPrice: {
             amount: string;
-            currencyCode: string;
+            currencyCode: any;
         };
-        lineItems: {
-            id: string;
-            title: string;
-            quantity: number;
-            variant: {
-                id: string;
-                title: string;
-                price: {
-                    amount: string;
-                    currencyCode: string;
-                };
-            };
-            product: {
-                id: string;
-                handle: string;
-                title: string;
-                featuredImage: {
-                    url: string;
-                } | null;
-            };
-        }[];
-        id: string;
-        orderNumber: string;
-        customerId?: string;
-        customerName?: string;
-        customerEmail?: string;
-        customerPhone?: string;
+        lineItems: any;
+    }>;
+    updateOrderStatus(id: string, payload: UpdateOrderStatusDto): Promise<{
+        id: any;
+        orderNumber: any;
+        customerName: any;
+        customerEmail: any;
+        customerPhone: any;
+        shippingAddress: {
+            address1: any;
+            address2: any;
+            city: any;
+            province: any;
+            zip: any;
+            country: any;
+        } | undefined;
         subtotal: number;
         shipping: number;
         tax: number;
         total: number;
-        currencyCode: string;
-        status: import("../../common/types/domain.types").OrderStatus;
-        paymentStatus: "pending" | "paid" | "refunded";
-        shippingAddress?: import("../../common/types/domain.types").AddressRecord;
-        items: import("../../common/types/domain.types").OrderItemRecord[];
-        notes: string[];
-        logs: string[];
-        createdAt: string;
-        updatedAt: string;
-    };
-    applyBulkAction(payload: BulkActionRequestDto): {
+        status: string;
+        createdAt: any;
+        items: any;
+        totalPrice: {
+            amount: string;
+            currencyCode: any;
+        };
+        lineItems: any;
+    }>;
+    applyBulkAction(payload: BulkActionRequestDto): Promise<{
         updated: number;
-    };
-    createShipment(id: string, payload: CreateShipmentDto): {
-        totalPrice: {
-            amount: string;
-            currencyCode: string;
-        };
-        lineItems: {
-            id: string;
-            title: string;
-            quantity: number;
-            variant: {
-                id: string;
-                title: string;
-                price: {
-                    amount: string;
-                    currencyCode: string;
-                };
-            };
-            product: {
-                id: string;
-                handle: string;
-                title: string;
-                featuredImage: {
-                    url: string;
-                } | null;
-            };
-        }[];
-        id: string;
-        orderNumber: string;
-        customerId?: string;
-        customerName?: string;
-        customerEmail?: string;
-        customerPhone?: string;
+    }>;
+    createShipment(id: string, payload: CreateShipmentDto): Promise<{
+        id: any;
+        orderNumber: any;
+        customerName: any;
+        customerEmail: any;
+        customerPhone: any;
+        shippingAddress: {
+            address1: any;
+            address2: any;
+            city: any;
+            province: any;
+            zip: any;
+            country: any;
+        } | undefined;
         subtotal: number;
         shipping: number;
         tax: number;
         total: number;
-        currencyCode: string;
-        status: import("../../common/types/domain.types").OrderStatus;
-        paymentStatus: "pending" | "paid" | "refunded";
-        shippingAddress?: import("../../common/types/domain.types").AddressRecord;
-        items: import("../../common/types/domain.types").OrderItemRecord[];
-        notes: string[];
-        logs: string[];
-        createdAt: string;
-        updatedAt: string;
-    };
-    createReturn(id: string, payload: CreateReturnDto): {
+        status: string;
+        createdAt: any;
+        items: any;
+        totalPrice: {
+            amount: string;
+            currencyCode: any;
+        };
+        lineItems: any;
+    }>;
+    createReturn(id: string, payload: CreateReturnDto): Promise<{
         id: string;
         orderId: string;
         status: string;
         reason: string;
         createdAt: string;
-    };
-    private serializeOrder;
-    private findOrder;
+    }>;
+    private commitReservations;
+    private releaseReservations;
     private extractItemsFromCart;
+    private extractItemsFromPayload;
+    private resolveVariant;
+    private orderInclude;
+    private serializeOrder;
+    private fromPrismaOrderStatus;
+    private buildStatusFilter;
+    private shouldPaginate;
+    private paginate;
+    private generateOrderNumber;
 }

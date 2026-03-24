@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Injectable,
   UnsupportedMediaTypeException,
@@ -32,7 +32,7 @@ export class MediaService {
     await mkdir(uploadDirectory, { recursive: true });
     await writeFile(join(uploadDirectory, filename), buffer);
 
-    const appUrl = this.configService.get<string>('app.url') ?? 'http://localhost:3001';
+    const appUrl = this.configService.get<string>('app.url') ?? 'http://127.0.0.1:3001';
     return {
       url: `${appUrl}/uploads/${filename}`,
     };
@@ -51,3 +51,4 @@ export class MediaService {
     }
   }
 }
+

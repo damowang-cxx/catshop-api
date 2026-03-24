@@ -16,44 +16,71 @@ exports.CustomerController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const admin_auth_guard_1 = require("../../common/auth/admin-auth.guard");
+const permissions_constants_1 = require("../../common/auth/permissions.constants");
+const permissions_decorator_1 = require("../../common/auth/permissions.decorator");
+const permissions_guard_1 = require("../../common/auth/permissions.guard");
 const pagination_query_dto_1 = require("../../common/dto/pagination-query.dto");
-const pagination_1 = require("../../common/utils/pagination");
-const mock_database_service_1 = require("../../shared/mock-database.service");
+const prisma_service_1 = require("../../prisma/prisma.service");
 let CustomerController = class CustomerController {
-    mockDb;
-    constructor(mockDb) {
-        this.mockDb = mockDb;
+    prisma;
+    constructor(prisma) {
+        this.prisma = prisma;
     }
-    listCustomers(query) {
-        let customers = [...this.mockDb.customers];
-        if (query.q) {
-            const keyword = query.q.toLowerCase();
-            customers = customers.filter((customer) => customer.email.toLowerCase().includes(keyword));
-        }
-        return (0, pagination_1.paginate)(customers.map((customer) => ({
-            id: customer.id,
-            email: customer.email,
-            firstName: customer.firstName,
-            lastName: customer.lastName,
-            phone: customer.phone,
-            status: customer.status,
-            lastLoginAt: customer.lastLoginAt,
-        })), query);
+    async listCustomers(query) {
+        const page = Math.max(1, query.page ?? 1);
+        const pageSize = Math.max(1, query.pageSize ?? 20);
+        const where = query.q
+            ? {
+                email: {
+                    contains: query.q,
+                    mode: 'insensitive',
+                },
+            }
+            : {};
+        const [items, total] = await this.prisma.$transaction([
+            this.prisma.customer.findMany({
+                where,
+                select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    phone: true,
+                    status: true,
+                    lastLoginAt: true,
+                },
+                orderBy: { createdAt: 'desc' },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            }),
+            this.prisma.customer.count({ where }),
+        ]);
+        return {
+            items: items.map((customer) => ({
+                ...customer,
+                status: customer.status.toLowerCase(),
+                lastLoginAt: customer.lastLoginAt?.toISOString() ?? undefined,
+            })),
+            total,
+            page,
+            pageSize,
+        };
     }
 };
 exports.CustomerController = CustomerController;
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(admin_auth_guard_1.AdminAuthGuard),
+    (0, common_1.UseGuards)(admin_auth_guard_1.AdminAuthGuard, permissions_guard_1.PermissionsGuard),
+    (0, permissions_decorator_1.RequiresPermissions)(permissions_constants_1.PERMISSIONS.customersRead),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], CustomerController.prototype, "listCustomers", null);
 exports.CustomerController = CustomerController = __decorate([
     (0, swagger_1.ApiTags)('customers'),
     (0, common_1.Controller)('customers'),
-    __metadata("design:paramtypes", [mock_database_service_1.MockDatabaseService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], CustomerController);
 //# sourceMappingURL=customer.controller.js.map
