@@ -94,12 +94,13 @@ If you only want to run the API project itself, use the steps below.
 
 ```bash
 cp .env.example .env
+cp .env.compose.example .env.compose
 ```
 
 2. Start dependencies:
 
 ```bash
-docker compose up -d postgres redis minio clickhouse meilisearch mailpit
+docker compose --env-file .env.compose up -d postgres redis minio clickhouse meilisearch mailpit
 ```
 
 3. Install dependencies, run migration, and seed:
