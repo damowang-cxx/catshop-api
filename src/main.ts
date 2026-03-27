@@ -23,23 +23,26 @@ async function bootstrap() {
   const apiPrefix = configService.get<string>('app.apiPrefix') ?? 'api';
   const uploadsRoot = join(process.cwd(), 'storage', 'uploads');
 
-  await app.register(cookie, {
+  // Cross-environment type compatibility:
+  // Fastify plugin type inference can diverge across package manager resolutions
+  // (especially on different hosts). Runtime behavior is unchanged.
+  await app.register(cookie as any, {
     secret: configService.get<string>('app.cookieSecret') ?? 'catshop-cookie-secret',
   });
-  await app.register(helmet);
-  await app.register(rateLimit, {
+  await app.register(helmet as any);
+  await app.register(rateLimit as any, {
     global: true,
     max: configService.get<number>('app.rateLimitMax') ?? 200,
     timeWindow: '1 minute',
     skipOnError: true,
   });
-  await app.register(multipart, {
+  await app.register(multipart as any, {
     limits: {
       fileSize: configService.get<number>('upload.maxFileSize') ?? 5 * 1024 * 1024,
       files: 5,
     },
   });
-  await app.register(fastifyStatic, {
+  await app.register(fastifyStatic as any, {
     root: uploadsRoot,
     prefix: '/uploads/',
   });
