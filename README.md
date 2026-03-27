@@ -151,4 +151,5 @@ To enable Google sign-in, set these variables in `.env`:
 - roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Prisma schema: [prisma/schema.prisma](prisma/schema.prisma)
 - local infra: [docker-compose.yml](docker-compose.yml)
+- Ubuntu prod template (web+api+nginx): `../catshop/DEPLOY_UBUNTU.md`
 
